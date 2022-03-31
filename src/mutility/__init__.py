@@ -9,3 +9,5 @@ except DistributionNotFound:
     __version__ = 'unknown'
 finally:
     del get_distribution, DistributionNotFound
+
+from .functions import filter_function, dm, get_label_fuction
