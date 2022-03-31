@@ -4,12 +4,18 @@
 """functions.py: Contains some utility functions that go nowhere else."""
 
 from typing import Optional, Callable, List, Dict, Tuple, Any
+from IPython.display import Markdown, display
 import numpy as np
 
 
 __author__ = "Marco Mernberger"
 __copyright__ = "Copyright (c) 2020 Marco Mernberger"
 __license__ = "mit"
+
+
+def dm(text):
+    "display helper for lazy typers"
+    display(Markdown(text))
 
 
 def filter_function(column_names: List[str], threshold: float, canonical_chromosomes: List[str], biotypes: List[str] = None) -> Callable:
