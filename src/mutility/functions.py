@@ -65,3 +65,7 @@ def get_label_fuction(columns_names_nice, row_names_nice):
             return row_names_nice[label]
         return label
     return label_func
+
+
+def dict_to_string_of_items(dictionary: dict) -> str:
+    return " ".join([str(item) for tuple in dictionary.items() for item in tuple if item!=""])
