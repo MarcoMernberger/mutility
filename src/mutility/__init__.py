@@ -10,4 +10,5 @@ except DistributionNotFound:
 finally:
     del get_distribution, DistributionNotFound
 
-from .functions import filter_function, dm, get_label_fuction, flatten
+from .functions import filter_function, dm, get_label_fuction
+from .util import flatten

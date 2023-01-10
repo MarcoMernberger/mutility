@@ -1,3 +1,6 @@
+from typing import Iterable
+
+
 def download_file(url, file_object):
     """Download an url"""
     if isinstance(file_object, (str, Path)):
@@ -57,17 +60,17 @@ def download_ftp(url, file_object):
                 raise ValueError("Error retrieving urls %s: %s" % (url, e))
 
 
-    def flatten(list_of_lists: Iterable) -> Iterable:
-        """
-        Flattens a nested list
-        """
-        if not hasattr(list_of_lists, "__iter__"):
-            return [list_of_lists]
-        flat = []
-        while(len(list_of_lists) != 0):
-            item = list_of_lists.pop(0)
-            if hasattr(item, "__iter__"):
-                flat.extend(item)
-            else:
-                flat.append(item)
-        return flat
+def flatten(list_of_lists: Iterable) -> Iterable:
+    """
+    Flattens a nested list
+    """
+    if not hasattr(list_of_lists, "__iter__"):
+        return [list_of_lists]
+    flat = []
+    while len(list_of_lists) != 0:
+        item = list_of_lists.pop(0)
+        if hasattr(item, "__iter__"):
+            flat.extend(item)
+        else:
+            flat.append(item)
+    return flat
