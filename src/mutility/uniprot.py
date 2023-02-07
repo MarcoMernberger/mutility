@@ -117,9 +117,7 @@ def get_kinases_with_ensembl_ids(species: str) -> DataFrame:
     df_ensembl.index = df_ensembl["uniprot"]
     df = df_uniprot.join(df_ensembl)
     df = df[["gene_stable_id", "uniprot_id", "kinase class"]]
-    df = df.drop_duplicates(
-        subset=["gene_stable_id"]
-    )  # we want that unique for indexing
+    df = df.drop_duplicates(subset=["gene_stable_id"])  # we want that unique for indexing
     assert len(df["gene_stable_id"].unique()) == len(df)
     return df
 
@@ -143,12 +141,10 @@ def write_kinases(outfile: Path, species: str) -> Job:
     """
     outfile.parent.mkdir(parents=True, exist_ok=True)
 
-    def __write():
+    def __write(outfile):
         df = get_kinases_with_ensembl_ids(species)
         df.to_csv(outfile, sep="\t", index=False)
 
-    return ppg.FileGeneratingJob(outfile, __write).depends_on(
-        ppg.FunctionInvariant(
-            "get_kinases_with_ensembl_ids", get_kinases_with_ensembl_ids
-        )
+    return ppg2.FileGeneratingJob(outfile, __write).depends_on(
+        ppg2.FunctionInvariant("get_kinases_with_ensembl_ids", get_kinases_with_ensembl_ids)
     )
