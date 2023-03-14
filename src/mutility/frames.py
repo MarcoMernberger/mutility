@@ -1,6 +1,6 @@
 import pandas as pd
 import re
-from typing import Union, Optional, List
+from typing import Union, Optional, List, Dict
 from pathlib import Path
 from pandas import DataFrame
 
@@ -15,7 +15,8 @@ def read_excel_from_biologists(
     sheet_name: Optional[Union[str, int]] = 0,
     trim_columns: Optional[List[str]] = None,
     merge_columns: List[str] = [],
-    **kwargs
+    combine_columns: Optional[Dict[str, List[str]]] = None,
+    **kwargs,
 ) -> DataFrame:
     converters = None
     if trim_columns is not None:
@@ -24,4 +25,9 @@ def read_excel_from_biologists(
     # deal with merged cells
     for col in merge_columns:
         df[col] = df[col].fillna(method="ffill")
+    if combine_columns is not None:
+        for new_column in combine_columns:
+            df[new_column] = df[combine_columns[new_column]].apply(
+                lambda row: "_".join(row), axis="columns"
+            )
     return df
