@@ -18,7 +18,12 @@ def dm(text):
     display(Markdown(text))
 
 
-def filter_function(column_names: List[str], threshold: float, canonical_chromosomes: List[str], biotypes: List[str] = None) -> Callable:
+def filter_function(
+    column_names: List[str],
+    threshold: float,
+    canonical_chromosomes: List[str],
+    biotypes: List[str] = None,
+) -> Callable:
     """
     Filter function for RNAseq used to filter genes instances.
 
@@ -43,6 +48,7 @@ def filter_function(column_names: List[str], threshold: float, canonical_chromos
     Callable
         Filter function t be passed to genes.filter.
     """
+
     def __filter(df):
         keep = np.zeros(len(df), dtype=bool)
         for column_name in column_names:
@@ -64,4 +70,22 @@ def get_label_fuction(columns_names_nice, row_names_nice):
         elif label in row_names_nice:
             return row_names_nice[label]
         return label
+
     return label_func
+
+
+def reverse_complement(sequence: str) -> str:
+    """
+    reverse_complement retuzrns the reverse complement of given sequence.
+
+    Parameters
+    ----------
+    sequence : str
+        Input sequence.
+
+    Returns
+    -------
+    str
+        Reverse complement of input sequence.
+    """
+    return sequence[::-1].translate(rev_comp_table)
