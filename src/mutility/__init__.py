@@ -12,4 +12,8 @@ finally:
 
 from .functions import *
 from .frames import read_excel_from_biologists
-from .genomics import reverse_complement
+from .genomics import (
+    reverse_complement,
+    get_one_letter_amino_acid_code,
+    get_three_letter_amino_acid_code,
+)
