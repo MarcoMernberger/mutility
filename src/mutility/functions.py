@@ -74,18 +74,5 @@ def get_label_fuction(columns_names_nice, row_names_nice):
     return label_func
 
 
-def reverse_complement(sequence: str) -> str:
-    """
-    reverse_complement retuzrns the reverse complement of given sequence.
-
-    Parameters
-    ----------
-    sequence : str
-        Input sequence.
-
-    Returns
-    -------
-    str
-        Reverse complement of input sequence.
-    """
-    return sequence[::-1].translate(rev_comp_table)
+def dict_to_string_of_items(dictionary: dict) -> str:
+    return " ".join([str(item) for tuple in dictionary.items() for item in tuple if item!=""])
