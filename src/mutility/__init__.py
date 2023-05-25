@@ -10,10 +10,11 @@ except DistributionNotFound:
 finally:
     del get_distribution, DistributionNotFound
 
-from .functions import *
-from .frames import read_excel_from_biologists
+from .functions import *  # noqa: E403
+from .frames import read_excel_from_biologists  # noqa: E401
 from .genomics import (
-    reverse_complement,
-    get_one_letter_amino_acid_code,
-    get_three_letter_amino_acid_code,
+    reverse_complement,  # noqa: E401
+    get_one_letter_amino_acid_code,  # noqa: E401
+    get_three_letter_amino_acid_code,  # noqa: E401
 )
+from .mutalyzer import CodonComparison, extract_codon_from_sequence  # noqa: E401

@@ -95,4 +95,3 @@ def get_three_letter_amino_acid_code(one_letter_code: str) -> str:
         Three letter amino acid code.
     """
     return one_to_three[one_letter_code]
-
