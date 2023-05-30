@@ -44,6 +44,10 @@ pattern_genomic_ins_dup = re.compile(r"NC_000017\.11:g\.\d+dup$")
 pattern_genomic_pattern_sub1 = re.compile(
     r"NC_000017\.11:g\.(?P<start>\d+)(?P<from>[ATCG])>(?P<to>[ATCG])$"
 )
+pattern_genomic_inv = re.compile(r"NC_000017\.11:g\.(?P<start>\d+)_(?P<stop>\d+)inv$")
+pattern_genomic_delins = re.compile(
+    r"NC_000017\.11:g\.(?P<start>\d+)_(?P<stop>\d+)delins(?P<ins>[ATCG]{1,3})$"
+)
 
 
 class CodonComparison:
@@ -76,7 +80,6 @@ class CodonComparison:
 
     def get_first_codon_difference(self, row: pd.Series) -> Tuple[str, str]:
         exon_id = row["ID"]
-        print(self.df_wt_exons)
         wt = self.df_wt_exons.loc[exon_id]
         sequence = "".join(
             [
@@ -139,11 +142,13 @@ def extract_genomic_info(row: pd.Series) -> Tuple[str, str]:
         match_pattern_genomic_sub_mult,
         match_pattern_genomic_sub1,
         match_pattern_genomic_ins_dup,
+        match_pattern_genomic_delins,
+        match_pattern_genomic_inv,
     ]:
-        match = matcher(row["hg38_genomic"])
+        match = matcher(row["hg38 genomic"])
         if match:
             return match
-    raise ValueError(f'Could not match {row["hg38_genomic"]}.')
+    raise ValueError(f'Could not match {row["hg38 genomic"]}.')
 
 
 def extract_protein_info(row: pd.Series) -> Tuple[str, str, str, str, str, str, str]:
@@ -191,7 +196,32 @@ def match_pattern_genomic_sub_mult(genomic: str) -> Union[Tuple[str, str], None]
     m = re.match(pattern_genomic_sub_mult, genomic)
     if m is not None:
         result = "sub", f"sub{m.group('sublist').count(';')+1}"
-        print(result)
+        return result
+    return None
+
+
+def match_pattern_genomic_delins(genomic: str) -> Union[Tuple[str, str], None]:
+    m = re.match(pattern_genomic_delins, genomic)
+    if m is not None:
+        ins = m.group("ins")
+        d = 1 + int(m.group("stop")) - int(m.group("start"))
+        try:
+            assert len(ins) == d
+        except AssertionError:
+            print(genomic)
+            print(ins)
+            print(d)
+            raise
+        result = "sub", f"sub{d}"
+        return result
+    return None
+
+
+def match_pattern_genomic_inv(genomic: str) -> Union[Tuple[str, str], None]:
+    m = re.match(pattern_genomic_inv, genomic)
+    if m is not None:
+        d = 1 + int(m.group("stop")) - int(m.group("start"))
+        result = "sub", f"sub{d}"
         return result
     return None
 
@@ -340,7 +370,6 @@ def match_pattern_protein_missense(
     row: pd.Series,
 ) -> Union[Tuple[str, str, str, str, str, str, str], None]:
     protein = row["hg38 protein"]
-    print(protein)
     m = re.match(pattern_protein_substitution, protein)
     if m is not None:
         type_p = "mis"

@@ -17,4 +17,4 @@ from .genomics import (
     get_one_letter_amino_acid_code,  # noqa: E401
     get_three_letter_amino_acid_code,  # noqa: E401
 )
-from .mutalyzer import CodonComparison, extract_codon_from_sequence  # noqa: E401
+from .mutalizer import CodonComparison, extract_codon_from_sequence  # noqa: E401
