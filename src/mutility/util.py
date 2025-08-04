@@ -1,4 +1,5 @@
 from typing import Iterable
+from scipy.spatial.distance import hamming
 
 
 def download_file(url, file_object):
@@ -74,3 +75,7 @@ def flatten(list_of_lists: Iterable) -> Iterable:
         else:
             flat.append(item)
     return flat
+
+
+def hamming(str1, str2):
+    return hamming(list(str1), list(str2)) * len(str1)
