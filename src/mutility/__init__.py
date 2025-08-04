@@ -18,3 +18,4 @@ from .genomics import (
     get_three_letter_amino_acid_code,  # noqa: E401
 )
 from .mutalizer import CodonComparison, extract_codon_from_sequence  # noqa: E401
+from .fastq import count_most_common_sequences
