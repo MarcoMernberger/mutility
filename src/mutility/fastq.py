@@ -1,9 +1,118 @@
 import pandas as pd
 import gzip
+import collections
 from pathlib import Path
 from gzip import GzipFile
 from typing import BinaryIO, Union, Optional
-import collections
+from dataclasses import dataclass, replace
+
+try:
+    import string
+
+    maketrans = string.maketrans
+except (ImportError, NameError, AttributeError):
+    maketrans = bytes.maketrans
+
+
+rev_comp_table = maketrans(
+    b"ACBDGHKMNSRUTWVYacbdghkmnsrutwvy", b"TGVHCDMKNSYAAWBRTGVHCDMKNSYAAWBR"
+)
+
+
+AdapterMatch = collections.namedtuple(
+    "AdapterMatch", ["astart", "astop", "rstart", "rstop", "matches", "errors"]
+)
+
+
+def reverse_complement(sequence: str) -> str:
+    """
+    reverse_complement retuzrns the reverse complement of given sequence.
+
+    Parameters
+    ----------
+    sequence : str
+        Input sequence.
+
+    Returns
+    -------
+    str
+        Reverse complement of input sequence.
+    """
+    return sequence[::-1].translate(rev_comp_table)
+
+
+@dataclass
+class Read:
+    """Data class for sequencing reads"""
+
+    Name: str
+    Sequence: str
+    Quality: str
+
+    def reverse():
+        return Read(
+            self.Name, reverse_complement(self.Sequence[::-1]), self.Quality[::-1]
+        )
+
+    def __str__(self):
+        return f"{self.Name}\n{self.Sequence}\n+\n{self.Quality}\n"
+
+
+class Fragment:
+    """Data class for single-end and paired-end Reads/Fragments."""
+
+    def __init__(self, *reads: Read):
+        self.Read1 = reads[0]
+        if len(reads) == 2:
+            self.Read2 = reads[1]
+
+    @property
+    def is_paired(self):
+        return hasattr(self, "Read2")
+
+    @property
+    def reads(self):
+        if self.is_paired:
+            return [self.Read1, self.Read2]
+        else:
+            return [
+                self.Read1,
+            ]
+
+    def __iter__(self):
+        for read in self.reads:
+            yield read
+
+    def copy(self):
+        return Fragment(replace(self.Read1), replace(self.Read2))
+
+    def __str__(self):
+        return f"{self.Read1}\n{self.Read2}\n"
+
+
+def _open_auto(filename: str):
+    if filename.endswith(".gz"):
+        return gzip.open(filename, "rb")
+    if filename.endswith(".bz2"):
+        return bz2.open(filename, "rb")
+    return open(filename, "rb", buffering=4 * 1024 * 1024)  # großer Buffer
+
+
+def iterate_fastq(filename: str, reverse_reads: bool) -> Read:
+    # op = mbf.align._common.BlockedFileAdaptor(filename)
+    op = _open_auto(filename)
+    while True:
+        try:
+            name = op.readline()[1:-1].decode()
+            seq = op.readline()[:-1].decode()
+            op.readline()
+            qual = op.readline()[:-1].decode()
+            if reverse_reads:
+                seq = seq[::-1].translate(rev_comp_table)
+                qual = qual[::-1]
+            yield Read(name, seq, qual)
+        except StopIteration:
+            break
 
 
 def get_fastq_iterator(filepath: Path):
@@ -14,7 +123,9 @@ def get_fastq_iterator(filepath: Path):
     return read_fastq_iterator(fileobj)
 
 
-def read_fastq_iterator(file_object: Union[BinaryIO, GzipFile]):
+def read_fastq_iterator(
+    file_object: Union[BinaryIO, GzipFile], reverse_reads: bool = False
+):
     """A very dump and simple fastq reader, mostly for testing the other more sophisticated variants
 
     Yield (seq, name, quality)
@@ -27,6 +138,9 @@ def read_fastq_iterator(file_object: Union[BinaryIO, GzipFile]):
         seq = row2[:-1]
         quality = row4[:-1]
         name = row1[1:-1]
+        if reverse_reads:
+            seq = seq[::-1].translate(rev_comp_table)
+            qual = qual[::-1]
         yield (seq, name, quality)
         row1 = file_object.readline().decode()
         row2 = file_object.readline().decode()
